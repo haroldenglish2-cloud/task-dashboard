@@ -57,6 +57,29 @@ rather than guessing.
 If two runs ever race on the push, rebase onto the remote and re-apply the
 `seen` union. Losing a `seen` entry costs a duplicate ping, nothing worse.
 
+## Creating the Routines (manual, one time)
+
+These cannot be created programmatically from a Claude Code session: the scan
+calls the Co-Invest connector, and this organization does not allow a session to
+attach connectors to a Routine it creates. A Routine made that way fires sessions
+with no `market_picks` tool, so every run would fail. Create both from the
+Routines UI on claude.ai instead, where the connector can be attached:
+
+- **Repository** — `haroldenglish2-cloud/task-dashboard`, revision
+  `claude/strategy-scanner-schedule-9wrh6u`.
+- **Connector** — Co-Invest. Without it the run cannot scan.
+- **Schedule** — one Routine per row of the table above. Two are needed because
+  the minimum interval is hourly.
+- **Notifications** — push on. Delivery is the Routine's own completion
+  notification; a fresh fired session has no terminal, so `PushNotification`
+  alone may reach nobody.
+- **Prompt** — "Read `scanner/RUNBOOK.md` in this repository and carry out one
+  scanner run exactly as it specifies, then stop. Most runs must end silently:
+  unless this is the first run of the New York day or a hit's
+  `SYMBOL:DIRECTION` key is absent from `scanner/state.json`, produce no
+  notification and no summary. Always commit and push `scanner/state.json` to
+  this branch, even on a silent run. Never ask a question — nobody is watching."
+
 ## Changing the scan
 
 Step 3 is the only part that defines *what* is scanned. To screen a fixed
